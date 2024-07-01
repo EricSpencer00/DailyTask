@@ -4,12 +4,10 @@ import CoreData
 import ConfettiSwiftUI
 
 struct ContentView: View {
-    @AppStorage("tasks", store: UserDefaults(suiteName: "group.com.yourcompany.DailyTaskChecker")) private var tasksData: Data = Data()
     @AppStorage("lastResetDate", store: UserDefaults(suiteName: "group.com.yourcompany.DailyTaskChecker")) private var lastResetDate: String = ""
-    @AppStorage("emojiBank", store: UserDefaults(suiteName: "group.com.yourcompany.DailyTaskChecker")) private var emojiBankData: Data = Data()
     @AppStorage("selectedTheme", store: UserDefaults(suiteName: "group.com.yourcompany.DailyTaskChecker")) private var selectedTheme: String = "System Default"
     @AppStorage("notificationTime", store: UserDefaults(suiteName: "group.com.yourcompany.DailyTaskChecker")) private var notificationTimeString: String = DateFormatter.localizedString(from: Date(), dateStyle: .none, timeStyle: .short)
-    
+        
     @Environment(\.managedObjectContext) private var viewContext
     
     @State private var tasks: [Task] = []
@@ -80,36 +78,18 @@ struct ContentView: View {
             }
         }
         .onAppear {
+            loadTasks()
             isFocused = false
         }
     }
     
     private func printAppStorageValues() {
-        // Decode tasksData
-        if let decodedTasks = try? JSONDecoder().decode([Task].self, from: tasksData) {
-            print("Tasks:")
-            for task in decodedTasks {
-                print(task)
-            }
-        } else {
-            print("Failed to decode tasksData.")
-        }
-
-        // Print lastResetDate
+        let tasks = TaskStorage.shared.loadTasks()
+        print("Tasks: \(tasks)")
         print("Last Reset Date: \(lastResetDate)")
-
-        // Decode emojiBankData
-        if let decodedEmojiBank = try? JSONDecoder().decode(EmojiBank.self, from: emojiBankData) {
-            print("Emoji Bank:")
-            print(decodedEmojiBank)
-        } else {
-            print("Failed to decode emojiBankData.")
-        }
-
-        // Print selectedTheme
+        let emojiBank = TaskStorage.shared.loadEmojiBank()
+        print("Emoji Bank: \(emojiBank)")
         print("Selected Theme: \(selectedTheme)")
-
-        // Print notificationTimeString
         print("Notification Time: \(notificationTimeString)")
     }
 
@@ -151,25 +131,16 @@ struct ContentView: View {
             lastResetDate = today
             saveTasks()
         }
-        loadTasks()
     }
 
     private func loadTasks() {
-        if let loadedTasks = try? JSONDecoder().decode([Task].self, from: tasksData) {
-            tasks = loadedTasks
-        }
-        if let loadedEmojiBank = try? JSONDecoder().decode(EmojiBank.self, from: emojiBankData) {
-            emojiBank = loadedEmojiBank
-        }
+        tasks = TaskStorage.shared.loadTasks()
+        emojiBank = TaskStorage.shared.loadEmojiBank()
     }
 
     private func saveTasks() {
-        if let data = try? JSONEncoder().encode(tasks) {
-            tasksData = data
-        }
-        if let data = try? JSONEncoder().encode(emojiBank) {
-            emojiBankData = data
-        }
+        TaskStorage.shared.saveTasks(tasks)
+        TaskStorage.shared.saveEmojiBank(emojiBank)
     }
 
     private func addTask() {

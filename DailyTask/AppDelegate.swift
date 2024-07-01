@@ -8,9 +8,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         UNUserNotificationCenter.current().delegate = self
         requestNotificationAuthorization()
         
-        // Access tasks from TaskManager and schedule reminders
-        TaskManager.shared.scheduleDailyReminder()
-        
+        let tasks = TaskStorage.shared.loadTasks()
+        scheduleDailyReminder(tasks: tasks)
+                
         return true
     }
 
@@ -37,31 +37,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         completionHandler()
     }
     
-//    func scheduleNotification(for task: Task, at time: Date()) {
-//        
-//        print("Scheduling notification for task: \(task.name) at \(task.notificationTime)")
-//        
-//        let content = UNMutableNotificationContent()
-//        content.title = "DailyTask"
-//        content.body = "Don't forget to: \(task.name)"
-//        content.sound = .default
-//        
-//        var dateComponents = Calendar.current.dateComponents([.hour, .minute], from: time)
-//        dateComponents.second = 0
-//
-//        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-//        let request = UNNotificationRequest(identifier: task.id.uuidString, content: content, trigger: trigger)
-//
-//        UNUserNotificationCenter.current().add(request) { error in
-//            if let error = error {
-//                print("Error scheduling notification: \(error.localizedDescription)")
-//            }
-//        }
-//    }
-    
-    func scheduleDailyReminder(at time: Date, tasks: [Task]) {
+    func scheduleDailyReminder(tasks: [Task]) {
         for task in tasks {
-//            scheduleNotification(for: task, at: time)
+            if task.notificationEnabled {
+                NotificationManager.shared.scheduleNotification(for: task)
+            }
         }
     }
 }

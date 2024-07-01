@@ -9,7 +9,7 @@ struct SettingsView: View {
     @State private var newEmoji: String = ""
     @State private var showInvalidEmojiAlert = false
     @AppStorage("selectedTheme", store: UserDefaults(suiteName: "group.com.yourcompany.DailyTaskChecker")) private var selectedTheme: String = "System Default"
-    //@AppStorage("notificationTime", store: UserDefaults(suiteName: "group.com.yourcompany.DailyTaskChecker")) private var notificationTimeString: String = DateFormatter.localizedString(from: Date(), dateStyle: .none, timeStyle: .short)
+    @AppStorage("notificationTime", store: UserDefaults(suiteName: "group.com.yourcompany.DailyTaskChecker")) private var notificationTimeString: String = DateFormatter.localizedString(from: Date(), dateStyle: .none, timeStyle: .short)
     @State private var emojiKeyboardVisible = false
 
     private let defaultEmojis = ["✅", "💊", "💉", "🩸", "🚴‍♂️", "🏃‍♂️", "🧘‍♂️", "⭐️"]
@@ -50,22 +50,6 @@ struct SettingsView: View {
                 }
                 .pickerStyle(SegmentedPickerStyle())
             }
-            Section {
-                HStack {
-                    Spacer()
-                    NavigationLink(destination: StreaksView()) {
-                        VStack {
-                            Image(systemName: "trophy")
-                                .resizable()
-                                .frame(width: 50, height: 50)
-                            Text("Achievements")
-                                .font(.headline)
-                        }
-                        .padding()
-                    }
-                    Spacer()
-                }
-            }
         }
         .alert(isPresented: $showInvalidEmojiAlert) {
             Alert(title: Text("Invalid Emoji"), message: Text("Please enter a valid emoji."), dismissButton: .default(Text("OK")))
@@ -96,22 +80,24 @@ struct SettingsView: View {
     }
 
     private func isValidEmoji(_ string: String) -> Bool {
-        string.unicodeScalars.allSatisfy { $0.properties.isEmoji }
+        if string.isEmpty {
+            return false
+        }
+
+        for scalar in string.unicodeScalars {
+            guard scalar.properties.isEmoji,
+                  (scalar.properties.isEmojiPresentation ||
+                   scalar.value >= 0x1F600 && scalar.value <= 0x1F64F ||  // Faces
+                   scalar.value >= 0x1F300 && scalar.value <= 0x1F5FF ||  // Misc Symbols + Pictographs
+                   scalar.value >= 0x1F680 && scalar.value <= 0x1F6FF ||  // Transport + Map
+                   scalar.value >= 0x1F1E6 && scalar.value <= 0x1F1FF) // Flags
+            else {
+                return false
+            }
+        }
+        
+        return true
     }
-
-//    private func scheduleDailyReminder() {
-//        if let delegate = UIApplication.shared.delegate as? AppDelegate {
-//            let reminderTime = getNotificationTime()
-//            delegate.scheduleDailyReminder(at: reminderTime, tasks: tasks)
-//        }
-//    }
-
-//    private func getNotificationTime() -> Date {
-//        let formatter = DateFormatter()
-//        formatter.dateStyle = .none
-//        formatter.timeStyle = .short
-//        return formatter.date(from: notificationTimeString) ?? Date()
-//    }
 }
 
 struct SettingsView_Previews: PreviewProvider {

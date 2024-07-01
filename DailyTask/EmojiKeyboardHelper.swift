@@ -5,9 +5,8 @@ struct EmojiKeyboardHelper: UIViewRepresentable {
 
     func makeUIView(context: Context) -> UIView {
         let view = UIView()
-        DispatchQueue.main.async {
-            view.becomeFirstResponder()
-        }
+        view.isUserInteractionEnabled = true // Ensure the view can interact
+        context.coordinator.setFirstResponder(view)
         return view
     }
 
@@ -18,6 +17,24 @@ struct EmojiKeyboardHelper: UIViewRepresentable {
             uiView.resignFirstResponder()
         }
     }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    class Coordinator: NSObject {
+        var parent: EmojiKeyboardHelper
+
+        init(_ parent: EmojiKeyboardHelper) {
+            self.parent = parent
+        }
+
+        func setFirstResponder(_ view: UIView) {
+            DispatchQueue.main.async {
+                view.becomeFirstResponder()
+            }
+        }
+    }
 }
 
 extension View {
@@ -25,6 +42,7 @@ extension View {
         self
             .background(
                 EmojiKeyboardHelper(isVisible: isVisible)
+                    .frame(width: 0, height: 0) // Invisible helper view
             )
     }
 }

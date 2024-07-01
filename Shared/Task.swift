@@ -1,4 +1,5 @@
 import Foundation
+import UserNotifications
 
 struct Task: Identifiable, Codable {
     var id: UUID
@@ -30,11 +31,50 @@ struct Task: Identifiable, Codable {
     }
 }
 
-struct TaskNotification: Identifiable {
-    var id: UUID
-    var taskId: UUID
-    var isEnabled: Bool
-    var notificationTime: Date
+class TaskStorage {
+    static let shared = TaskStorage()
+    
+    private let taskKey = "tasks"
+    private let emojiBankKey = "emojiBank"
+    private let suiteName = "group.com.yourcompany.DailyTaskChecker"
+    
+    private var userDefaults: UserDefaults {
+        return UserDefaults(suiteName: suiteName)!
+    }
+    
+    func saveTasks(_ tasks: [Task]) {
+        do {
+            let data = try JSONEncoder().encode(tasks)
+            userDefaults.set(data, forKey: taskKey)
+        } catch {
+            print("Failed to save tasks: \(error.localizedDescription)")
+        }
+    }
+    
+    func loadTasks() -> [Task] {
+        guard let data = userDefaults.data(forKey: taskKey),
+              let tasks = try? JSONDecoder().decode([Task].self, from: data) else {
+            return []
+        }
+        return tasks
+    }
+
+    func saveEmojiBank(_ emojiBank: EmojiBank) {
+        do {
+            let data = try JSONEncoder().encode(emojiBank)
+            userDefaults.set(data, forKey: emojiBankKey)
+        } catch {
+            print("Failed to save emoji bank: \(error.localizedDescription)")
+        }
+    }
+    
+    func loadEmojiBank() -> EmojiBank {
+        guard let data = userDefaults.data(forKey: emojiBankKey),
+              let emojiBank = try? JSONDecoder().decode(EmojiBank.self, from: data) else {
+            return EmojiBank(emojis: ["✅", "💊", "💉", "🩸", "🚴‍♂️", "🏃‍♂️", "🧘‍♂️", "⭐️"])
+        }
+        return emojiBank
+    }
 }
 
 struct TaskDate {
