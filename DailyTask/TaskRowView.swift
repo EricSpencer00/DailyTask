@@ -62,13 +62,6 @@ struct TaskRowView: View {
         }
     }
     
-//    private func clearAllTasks() {
-//        tasks.forEach { NotificationManager.shared.unscheduleNotification(for: $0) }
-//        tasks.removeAll()
-//        saveTasks()
-//        WidgetCenter.shared.reloadAllTimelines()
-//    }
-    
     private func markTaskAsCompleted(task: inout Task) {
         StreakManager.shared.incrementCompletion(for: &task)
         task.isCompleted = true

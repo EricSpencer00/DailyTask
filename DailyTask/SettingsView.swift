@@ -10,48 +10,49 @@ struct SettingsView: View {
     @State private var showInvalidEmojiAlert = false
     @AppStorage("selectedTheme", store: UserDefaults(suiteName: "group.com.yourcompany.DailyTaskChecker")) private var selectedTheme: String = "System Default"
     @AppStorage("notificationTime", store: UserDefaults(suiteName: "group.com.yourcompany.DailyTaskChecker")) private var notificationTimeString: String = DateFormatter.localizedString(from: Date(), dateStyle: .none, timeStyle: .short)
-//    @State private var emojiKeyboardVisible = false
-
+    
     private let defaultEmojis = ["✅", "💊", "💉", "🩸", "🚴‍♂️", "🏃‍♂️", "🧘‍♂️", "⭐️"]
 
     var body: some View {
-        Form {
-            Section(header: Text("Edit Emoji Bank")) {
-                EmojiGrid(emojiBank: $emojiBank)
-                
-                HStack {
-                    TextField("New Emoji", text: $newEmoji)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                    Button(action: addEmoji) {
-                        Text("Add")
+        NavigationView {
+            Form {
+                Section(header: Text("Edit Emoji Bank")) {
+                    EmojiGrid(emojiBank: $emojiBank)
+                    
+                    HStack {
+                        TextField("New Emoji", text: $newEmoji)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                        Button(action: addEmoji) {
+                            Text("Add")
+                        }
+                    }
+                    .padding()
+
+                    Button(action: resetEmojis) {
+                        Text("Reset Emojis to Default")
+                            .foregroundColor(.red)
+                    }
+                    .padding()
+                }
+                Section {
+                    NavigationLink(destination: NotificationView(tasks: $tasks)) {
+                        Text("Notification Settings")
                     }
                 }
-                .padding()
-
-                Button(action: resetEmojis) {
-                    Text("Reset Emojis to Default")
-                        .foregroundColor(.red)
-                }
-                .padding()
-            }
-            Section {
-                NavigationLink(destination: NotificationView(tasks: $tasks)) {
-                    Text("Notification Settings")
+                Section(header: Text("Appearance")) {
+                    Picker("Theme", selection: $selectedTheme) {
+                        Text("Light").tag("Light")
+                        Text("Dark").tag("Dark")
+                        Text("System Default").tag("System Default")
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
                 }
             }
-            Section(header: Text("Appearance")) {
-                Picker("Theme", selection: $selectedTheme) {
-                    Text("Light").tag("Light")
-                    Text("Dark").tag("Dark")
-                    Text("System Default").tag("System Default")
-                }
-                .pickerStyle(SegmentedPickerStyle())
+            .alert(isPresented: $showInvalidEmojiAlert) {
+                Alert(title: Text("Invalid Emoji"), message: Text("Please enter a valid emoji."), dismissButton: .default(Text("OK")))
             }
+            .navigationTitle("Settings")
         }
-        .alert(isPresented: $showInvalidEmojiAlert) {
-            Alert(title: Text("Invalid Emoji"), message: Text("Please enter a valid emoji."), dismissButton: .default(Text("OK")))
-        }
-//        .navigationTitle("Settings")
     }
 
     private func addEmoji() {
@@ -99,14 +100,12 @@ struct SettingsView: View {
 
 struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
-        NavigationView {
-            SettingsView(
-                emojiBank: .constant(EmojiBank(emojis: ["✅", "💊", "💉"])),
-                tasks: .constant([
-                    Task(name: "Sample Task 1", urgency: .low),
-                    Task(name: "Sample Task 2", urgency: .high, notificationTime: Date(), notificationEnabled: true)
-                ])
-            )
-        }
+        SettingsView(
+            emojiBank: .constant(EmojiBank(emojis: ["✅", "💊", "💉"])),
+            tasks: .constant([
+                Task(name: "Sample Task 1", urgency: .low),
+                Task(name: "Sample Task 2", urgency: .high, notificationTime: Date(), notificationEnabled: true)
+            ])
+        )
     }
 }
