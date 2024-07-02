@@ -2,6 +2,7 @@ import SwiftUI
 
 struct NotificationView: View {
     @Binding var tasks: [Task]
+    @State private var localTasks: [Task] = [] // Prevent rerendering of SettingsView
     @State private var disableAll: Bool = false
 
     var body: some View {
@@ -37,6 +38,13 @@ struct NotificationView: View {
                 }
             }
         }
+        .onAppear {
+            localTasks = tasks
+        }
+        .onDisappear {
+            tasks = localTasks
+            TaskStorage.shared.saveTasks(tasks)
+        }
         .navigationBarTitle("Notification Settings", displayMode: .inline)
     }
 
@@ -46,7 +54,7 @@ struct NotificationView: View {
             if newValue {
                 NotificationManager.shared.unscheduleNotification(for: tasks[index])
             } else {
-                if let notificationTime = tasks[index].notificationTime {
+                if tasks[index].notificationTime != nil {
                     NotificationManager.shared.scheduleNotification(for: tasks[index])
                 }
             }
@@ -56,7 +64,7 @@ struct NotificationView: View {
 
     private func handleNotificationEnabledChange(for task: Task, isEnabled: Bool) {
         if isEnabled {
-            if let notificationTime = task.notificationTime {
+            if task.notificationTime != nil {
                 NotificationManager.shared.scheduleNotification(for: task)
             }
         } else {
