@@ -1,7 +1,7 @@
 import SwiftUI
 import WidgetKit
 import CoreData
-import UniformTypeIdentifiers
+import ConfettiSwiftUI
 
 struct ContentView: View {
     @AppStorage("lastResetDate", store: UserDefaults(suiteName: "group.com.yourcompany.DailyTaskChecker")) private var lastResetDate: String = ""
@@ -31,6 +31,10 @@ struct ContentView: View {
                     Text("No tasks, create some below!")
                         .font(.title)
                         .padding()
+                    // Reset isEditing to false when there are no tasks
+                    .onAppear {
+                        isEditing = false
+                    }
                 } else {
                     ScrollView(.vertical) {
                         VStack(spacing: 10) {
@@ -48,15 +52,7 @@ struct ContentView: View {
                     addTaskAction: addTask,
                     isFocused: _isFocused
                 )
-//                .confettiCannon(counter: $confettiTrigger, confettiSize: 20.0, repetitions: 3, repetitionInterval: 0.5)
-                
-                if isEditing {
-                    Button(action: clearAllTasks) {
-                        Text("Clear All Tasks")
-                            .foregroundColor(.red)
-                    }
-                    .padding()
-                }
+                .confettiCannon(counter: $confettiTrigger, confettiSize: 20.0, repetitions: 2, repetitionInterval: 0.1)
             }
             .onAppear(perform: checkAndResetTasks)
             .onOpenURL(perform: handleOpenURL)
@@ -84,11 +80,14 @@ struct ContentView: View {
                     }
                 }
             }
+//            .onChange(of: tasks) { newTasks in
+//                if newTasks.isEmpty {
+//                    isEditing = false
+//                }
+//            }
         }
         .onAppear {
-            loadTasksAsync { loadedTasks in
-                self.tasks = loadedTasks
-            }
+            loadTasks()
             isFocused = false
         }
     }
@@ -118,34 +117,13 @@ struct ContentView: View {
             message: Text("Are you sure you \(taskToComplete?.name ?? "")'d today?"),
             primaryButton: .default(Text("Yes")) {
                 if let task = taskToComplete, let index = tasks.firstIndex(where: { $0.id == task.id }) {
-                    let currentDate = Date()
-                    let calendar = Calendar.current
-
-                    if let lastCompletionDate = tasks[index].lastCompletionDate, calendar.isDateInToday(lastCompletionDate) {
-                        // Task has already been completed today
-                        return
-                    }
-
-                    // Increment the completion count and update the last completion date
-                    tasks[index].completions += 1
-                    tasks[index].lastCompletionDate = currentDate
-                    tasks[index].isCompleted = true
-
-                    saveTasks()
-                    WidgetCenter.shared.reloadAllTimelines()
-                    StreakManager.shared.updateStreak(for: task.id)
-                    AchievementManager.shared.checkAchievements(for: task.id)
-                    AchievementManager.shared.checkAllTasksCompleted(for: tasks)
-
-                    if tasks.allSatisfy({ $0.isCompleted }) {
-                        confettiTrigger += 1
-                    }
+                    toggleTaskCompletion(for: index)
+                    confettiTrigger += 1
                 }
             },
             secondaryButton: .cancel()
         )
     }
-
 
     private func checkAndResetTasks() {
         let today = getCurrentDateString()
@@ -156,13 +134,9 @@ struct ContentView: View {
         }
     }
 
-    private func loadTasksAsync(completion: @escaping ([Task]) -> Void) {
-        DispatchQueue.global(qos: .background).async {
-            let tasks = TaskStorage.shared.loadTasks()
-            DispatchQueue.main.async {
-                completion(tasks)
-            }
-        }
+    private func loadTasks() {
+        tasks = TaskStorage.shared.loadTasks()
+        emojiBank = TaskStorage.shared.loadEmojiBank()
     }
 
     private func saveTasks() {
@@ -192,13 +166,6 @@ struct ContentView: View {
             saveTasks()
             WidgetCenter.shared.reloadAllTimelines()
         }
-    }
-    
-    private func clearAllTasks() {
-        tasks.forEach { NotificationManager.shared.unscheduleNotification(for: $0) }
-        tasks.removeAll()
-        saveTasks()
-        WidgetCenter.shared.reloadAllTimelines()
     }
 
     private func moveTask(from source: IndexSet, to destination: Int) {
@@ -234,6 +201,19 @@ struct ContentView: View {
             // Handle the Core Data error.
         }
     }
+
+    private func toggleTaskCompletion(for index: Int) {
+        tasks[index].isCompleted.toggle()
+        if tasks[index].isCompleted {
+            StreakManager.shared.incrementCompletion(for: &tasks[index])
+        } else {
+            StreakManager.shared.resetStreak(for: tasks[index].id)
+        }
+        saveTasks()
+        WidgetCenter.shared.reloadAllTimelines()
+        AchievementManager.shared.checkAchievements(for: tasks[index].id)
+        AchievementManager.shared.checkAllTasksCompleted(for: tasks)
+    }
 }
 
 struct TaskBucketView: View {
@@ -244,21 +224,18 @@ struct TaskBucketView: View {
     @Binding var isEditing: Bool
 
     var body: some View {
-        ForEach(Urgency.allCases, id: \.self) { urgency in
-            VStack {
-                if !tasks.filter({ $0.urgency == urgency }).isEmpty {
-                    TaskBucket(urgency: urgency, tasks: $tasks, taskToComplete: $taskToComplete, showCompletionConfirmation: $showCompletionConfirmation, taskToEdit: $taskToEdit, isEditing: $isEditing)
-                } else {
-                    Rectangle()
-                        .fill(Color.gray.opacity(0.2))
-                        .frame(height: 50) // Ensure drop area is visible
-                        .overlay(
-                            Text(urgency.displayName)
-                                .foregroundColor(.gray)
-                        )
-                        .onDrop(of: [UTType.text], delegate: TaskDropDelegate(task: Task(id: UUID(), name: ""), tasks: $tasks, currentUrgency: urgency))
-                }
+        ForEach(Urgency.allCases.sorted(by: { $0.priority > $1.priority }), id: \.self) { urgency in
+            if !tasks.filter({ $0.urgency == urgency }).isEmpty {
+                TaskBucket(
+                    urgency: urgency,
+                    tasks: $tasks,
+                    taskToComplete: $taskToComplete,
+                    showCompletionConfirmation: $showCompletionConfirmation,
+                    taskToEdit: $taskToEdit,
+                    isEditing: $isEditing
+                )
             }
         }
     }
 }
+

@@ -9,10 +9,10 @@
 /* Begin PBXBuildFile section */
 		971A22B12C0AAB950064DB0C /* SQLiteDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971A22B02C0AAB950064DB0C /* SQLiteDatabase.swift */; };
 		971A22B22C0AAB950064DB0C /* SQLiteDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971A22B02C0AAB950064DB0C /* SQLiteDatabase.swift */; };
-		971A22B42C0AAC640064DB0C /* Games.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971A22B32C0AAC640064DB0C /* Games.swift */; };
-		971A22B52C0AAC640064DB0C /* Games.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971A22B32C0AAC640064DB0C /* Games.swift */; };
-		971A22B72C0AAC9A0064DB0C /* GamesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971A22B62C0AAC9A0064DB0C /* GamesView.swift */; };
-		971A22B82C0AAC9A0064DB0C /* GamesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971A22B62C0AAC9A0064DB0C /* GamesView.swift */; };
+		971A22B42C0AAC640064DB0C /* Streaks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971A22B32C0AAC640064DB0C /* Streaks.swift */; };
+		971A22B52C0AAC640064DB0C /* Streaks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971A22B32C0AAC640064DB0C /* Streaks.swift */; };
+		971A22B72C0AAC9A0064DB0C /* StreaksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971A22B62C0AAC9A0064DB0C /* StreaksView.swift */; };
+		971A22B82C0AAC9A0064DB0C /* StreaksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971A22B62C0AAC9A0064DB0C /* StreaksView.swift */; };
 		971A22BA2C0B6F120064DB0C /* AchievementsBubbleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971A22B92C0B6F120064DB0C /* AchievementsBubbleView.swift */; };
 		971A22BB2C0B6F120064DB0C /* AchievementsBubbleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971A22B92C0B6F120064DB0C /* AchievementsBubbleView.swift */; };
 		971A22BE2C0B70470064DB0C /* ConfettiSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 971A22BD2C0B70470064DB0C /* ConfettiSwiftUI */; };
@@ -94,8 +94,8 @@
 
 /* Begin PBXFileReference section */
 		971A22B02C0AAB950064DB0C /* SQLiteDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SQLiteDatabase.swift; sourceTree = "<group>"; };
-		971A22B32C0AAC640064DB0C /* Games.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Games.swift; sourceTree = "<group>"; };
-		971A22B62C0AAC9A0064DB0C /* GamesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamesView.swift; sourceTree = "<group>"; };
+		971A22B32C0AAC640064DB0C /* Streaks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Streaks.swift; sourceTree = "<group>"; };
+		971A22B62C0AAC9A0064DB0C /* StreaksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreaksView.swift; sourceTree = "<group>"; };
 		971A22B92C0B6F120064DB0C /* AchievementsBubbleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementsBubbleView.swift; sourceTree = "<group>"; };
 		971A22C22C0FEDB10064DB0C /* TestFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestFile.swift; sourceTree = "<group>"; };
 		971A22C82C0FEE3E0064DB0C /* DailyTask.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DailyTask.entitlements; sourceTree = "<group>"; };
@@ -218,9 +218,8 @@
 				974AFEC12C068BE900A1CF00 /* NewTaskView.swift */,
 				97887FA92C04186F0042E674 /* SettingsView.swift */,
 				974AFEB52C04EEE500A1CF00 /* Launch Screen.storyboard */,
-				974AFEC52C06C47100A1CF00 /* UtilityFunctions.swift */,
-				971A22B32C0AAC640064DB0C /* Games.swift */,
-				971A22B62C0AAC9A0064DB0C /* GamesView.swift */,
+				971A22B32C0AAC640064DB0C /* Streaks.swift */,
+				971A22B62C0AAC9A0064DB0C /* StreaksView.swift */,
 				974AFEB12C04EEA200A1CF00 /* EmojiKeyboardHelper.swift */,
 				97A122542C1B6FEB00BEAF6C /* NotificationsView.swift */,
 				971A22B92C0B6F120064DB0C /* AchievementsBubbleView.swift */,
@@ -230,6 +229,7 @@
 				97887F642C04087B0042E674 /* Preview Content */,
 				97887F622C04087B0042E674 /* Assets.xcassets */,
 				974AFECE2C06ECB700A1CF00 /* TaskCompletion.swift */,
+				974AFEC52C06C47100A1CF00 /* UtilityFunctions.swift */,
 			);
 			path = DailyTask;
 			sourceTree = "<group>";
@@ -455,13 +455,13 @@
 				974AFEB22C04EEA200A1CF00 /* EmojiKeyboardHelper.swift in Sources */,
 				974AFEBC2C0628B800A1CF00 /* TaskBucket.swift in Sources */,
 				971A22C32C0FEDB10064DB0C /* TestFile.swift in Sources */,
-				971A22B42C0AAC640064DB0C /* Games.swift in Sources */,
+				971A22B42C0AAC640064DB0C /* Streaks.swift in Sources */,
 				974AFEBA2C061F5800A1CF00 /* SplashView.swift in Sources */,
 				974AFEC82C06C76200A1CF00 /* TaskDropDelegate.swift in Sources */,
 				97887F612C0408780042E674 /* ContentView.swift in Sources */,
 				97887FAA2C04186F0042E674 /* SettingsView.swift in Sources */,
 				97A122552C1B6FEB00BEAF6C /* NotificationsView.swift in Sources */,
-				971A22B72C0AAC9A0064DB0C /* GamesView.swift in Sources */,
+				971A22B72C0AAC9A0064DB0C /* StreaksView.swift in Sources */,
 				974AFEB02C04EE8900A1CF00 /* EmojiGrid.swift in Sources */,
 				971A22B12C0AAB950064DB0C /* SQLiteDatabase.swift in Sources */,
 				974AFEAE2C04DBF500A1CF00 /* DailyTaskApp.swift in Sources */,
@@ -499,9 +499,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				971A22B82C0AAC9A0064DB0C /* GamesView.swift in Sources */,
+				971A22B82C0AAC9A0064DB0C /* StreaksView.swift in Sources */,
 				971A22B22C0AAB950064DB0C /* SQLiteDatabase.swift in Sources */,
-				971A22B52C0AAC640064DB0C /* Games.swift in Sources */,
+				971A22B52C0AAC640064DB0C /* Streaks.swift in Sources */,
 				971A22C42C0FEDB10064DB0C /* TestFile.swift in Sources */,
 				97DAD1172C3263E100B4907F /* NotificationManager.swift in Sources */,
 				971A22BB2C0B6F120064DB0C /* AchievementsBubbleView.swift in Sources */,

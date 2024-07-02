@@ -36,7 +36,12 @@ struct SettingsView: View {
                 }
                 Section {
                     NavigationLink(destination: NotificationView(tasks: $tasks)) {
-                        Text("Notification Settings")
+                        Text("Notification Settings 🕑")
+                    }
+                }
+                Section {
+                    NavigationLink(destination: StreaksView()) {
+                        Text("Trophies 🏆")
                     }
                 }
                 Section(header: Text("Appearance")) {

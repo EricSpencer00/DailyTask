@@ -11,42 +11,69 @@ struct TaskRowView: View {
     @Binding var isEditing: Bool
 
     var body: some View {
-        HStack {
+        Group {
             if isEditing {
-                Button(action: {
-                    deleteTask(task: task)
-//                    NotificationManager.unscheduleNotification(task: task)
-                }) {
-                    Image(systemName: "x.circle.fill")
-                        .foregroundColor(.red)
-                        .padding(.trailing, 8)
+                HStack {
+                    Button(action: {
+                        deleteTask(task: task)
+                    }) {
+                        Image(systemName: "x.circle.fill")
+                            .foregroundColor(.red)
+                            .padding(.trailing, 8)
+                    }
+                    .transition(.scale)
+                    Text(task.emoji)
+                        .font(.system(size: 20))
+                    Text(task.name)
+                        .foregroundColor(.black)
+                        .padding()
+                        .cornerRadius(10)
+                    Spacer()
+                    if let notificationTime = task.notificationTime {
+                        Text(clockEmoji(for: notificationTime))
+                            .padding(.trailing, 4)
+                    }
                 }
-                .transition(.scale)
-            }
-            Text(task.emoji)
-                .font(.system(size: 20))
-            Text(task.name)
-                .foregroundColor(.black)
-                .padding()
-                .cornerRadius(10)
-            Spacer()
-            if let notificationTime = task.notificationTime {
-                Text(clockEmoji(for: notificationTime))
-                    .padding(.trailing, 4)
-            }
-            if !isEditing {
+                .padding(8)
+                .background(Color.white)
+                .cornerRadius(15)
+                .shadow(radius: 5)
+            } else {
                 Button(action: {
-                    markTaskAsCompleted(task: &tasks[tasks.firstIndex(where: { $0.id == task.id })!])
+                    if task.isCompleted {
+                        // Directly toggle the task completion without confirmation
+                        if let index = tasks.firstIndex(where: { $0.id == task.id }) {
+                            toggleTaskCompletion(for: index)
+                        }
+                    } else {
+                        // Show confirmation for completing the task
+                        taskToComplete = task
+                        showCompletionConfirmation = true
+                    }
                 }) {
-                    Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
-                        .foregroundColor(task.isCompleted ? .green : .red)
+                    HStack {
+                        Text(task.emoji)
+                            .font(.system(size: 20))
+                        Text(task.name)
+                            .foregroundColor(.black)
+                            .padding()
+                            .cornerRadius(10)
+                        Spacer()
+                        if let notificationTime = task.notificationTime {
+                            Text(clockEmoji(for: notificationTime))
+                                .padding(.trailing, 4)
+                        }
+                        Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
+                            .foregroundColor(task.isCompleted ? .green : .red)
+                    }
+                    .padding(8)
+                    .background(Color.white)
+                    .cornerRadius(15)
+                    .shadow(radius: 5)
                 }
+                .buttonStyle(PlainButtonStyle()) // Ensures button looks like a row
             }
         }
-        .padding(8)
-        .background(Color.white)
-        .cornerRadius(15)
-        .shadow(radius: 5)
     }
 
     private func saveTasks() {
@@ -62,19 +89,18 @@ struct TaskRowView: View {
         }
     }
     
-    private func markTaskAsCompleted(task: inout Task) {
-        StreakManager.shared.incrementCompletion(for: &task)
-        task.isCompleted = true
+    private func toggleTaskCompletion(for index: Int) {
+        tasks[index].isCompleted.toggle()
+        if tasks[index].isCompleted {
+            StreakManager.shared.incrementCompletion(for: &tasks[index])
+        } else {
+            StreakManager.shared.resetStreak(for: tasks[index].id)
+        }
         saveTasks()
         WidgetCenter.shared.reloadAllTimelines()
-        AchievementManager.shared.checkAchievements(for: task.id)
+        AchievementManager.shared.checkAchievements(for: tasks[index].id)
         AchievementManager.shared.checkAllTasksCompleted(for: tasks)
-
-//        if tasks.allSatisfy({ $0.isCompleted }) {
-//            confettiTrigger += 1
-//        }
     }
-
 
     private func color(for urgency: Urgency) -> Color {
         switch urgency {
@@ -117,7 +143,6 @@ struct TaskRowView: View {
             return ""
         }
     }
-
 }
 
 struct TaskRowView_Previews: PreviewProvider {
@@ -142,5 +167,3 @@ struct TaskRowView_Previews: PreviewProvider {
         )
     }
 }
-
-
