@@ -118,7 +118,19 @@ struct ContentView: View {
             message: Text("Are you sure you \(taskToComplete?.name ?? "")'d today?"),
             primaryButton: .default(Text("Yes")) {
                 if let task = taskToComplete, let index = tasks.firstIndex(where: { $0.id == task.id }) {
-                    tasks[index].isCompleted.toggle()
+                    let currentDate = Date()
+                    let calendar = Calendar.current
+
+                    if let lastCompletionDate = tasks[index].lastCompletionDate, calendar.isDateInToday(lastCompletionDate) {
+                        // Task has already been completed today
+                        return
+                    }
+
+                    // Increment the completion count and update the last completion date
+                    tasks[index].completions += 1
+                    tasks[index].lastCompletionDate = currentDate
+                    tasks[index].isCompleted = true
+
                     saveTasks()
                     WidgetCenter.shared.reloadAllTimelines()
                     StreakManager.shared.updateStreak(for: task.id)
@@ -133,6 +145,7 @@ struct ContentView: View {
             secondaryButton: .cancel()
         )
     }
+
 
     private func checkAndResetTasks() {
         let today = getCurrentDateString()

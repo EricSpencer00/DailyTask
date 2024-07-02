@@ -9,8 +9,8 @@ struct Task: Identifiable, Codable {
     var urgency: Urgency
     var notificationTime: Date?
     var notificationEnabled: Bool
-//    var birthday: Date
-//    var completions: Int
+    var completions: Int
+    var lastCompletionDate: Date?
 
     init(id: UUID = UUID(), 
          name: String,
@@ -18,7 +18,9 @@ struct Task: Identifiable, Codable {
          isCompleted: Bool = false,
          emoji: String = "✅",
          notificationTime: Date? = nil,
-         notificationEnabled: Bool = false
+         notificationEnabled: Bool = false,
+         completions: Int = 0,
+         lastCompletionDate: Date? = nil
          )
     {
         self.id = id
@@ -28,6 +30,8 @@ struct Task: Identifiable, Codable {
         self.emoji = emoji
         self.notificationTime = notificationTime
         self.notificationEnabled = notificationEnabled
+        self.completions = completions
+        self.lastCompletionDate = lastCompletionDate
     }
 }
 
@@ -182,5 +186,19 @@ class StreakManager {
         streaks[taskId] = 0
         lastCompletionDates[taskId] = nil
     }
+
+    func incrementCompletion(for task: inout Task) {
+        let currentDate = Date()
+        if let lastCompletionDate = task.lastCompletionDate {
+            if Calendar.current.isDateInToday(lastCompletionDate) {
+                // Already completed today
+                return
+            }
+        }
+        task.completions += 1
+        task.lastCompletionDate = currentDate
+        updateStreak(for: task.id)
+    }
 }
+
 

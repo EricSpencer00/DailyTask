@@ -1,5 +1,6 @@
 import SwiftUI
 import WidgetKit
+import ConfettiSwiftUI
 
 struct TaskRowView: View {
     var task: Task
@@ -35,17 +36,7 @@ struct TaskRowView: View {
             }
             if !isEditing {
                 Button(action: {
-                    if task.isCompleted {
-                        if let index = tasks.firstIndex(where: { $0.id == task.id }) {
-                            tasks[index].isCompleted.toggle()
-                            saveTasks()
-                            WidgetCenter.shared.reloadAllTimelines()
-                        }
-                    } else {
-                        taskToComplete = task
-                        showCompletionConfirmation = true
-                        saveTasks()
-                    }
+                    markTaskAsCompleted(task: &tasks[tasks.firstIndex(where: { $0.id == task.id })!])
                 }) {
                     Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
                         .foregroundColor(task.isCompleted ? .green : .red)
@@ -59,9 +50,7 @@ struct TaskRowView: View {
     }
 
     private func saveTasks() {
-        if let data = try? JSONEncoder().encode(tasks) {
-            UserDefaults.standard.set(data, forKey: "tasks")
-        }
+        TaskStorage.shared.saveTasks(tasks)
     }
 
     private func deleteTask(task: Task) {
@@ -73,12 +62,26 @@ struct TaskRowView: View {
         }
     }
     
-    private func clearAllTasks() {
-        tasks.forEach { NotificationManager.shared.unscheduleNotification(for: $0) }
-        tasks.removeAll()
+//    private func clearAllTasks() {
+//        tasks.forEach { NotificationManager.shared.unscheduleNotification(for: $0) }
+//        tasks.removeAll()
+//        saveTasks()
+//        WidgetCenter.shared.reloadAllTimelines()
+//    }
+    
+    private func markTaskAsCompleted(task: inout Task) {
+        StreakManager.shared.incrementCompletion(for: &task)
+        task.isCompleted = true
         saveTasks()
         WidgetCenter.shared.reloadAllTimelines()
+        AchievementManager.shared.checkAchievements(for: task.id)
+        AchievementManager.shared.checkAllTasksCompleted(for: tasks)
+
+//        if tasks.allSatisfy({ $0.isCompleted }) {
+//            confettiTrigger += 1
+//        }
     }
+
 
     private func color(for urgency: Urgency) -> Color {
         switch urgency {
