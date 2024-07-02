@@ -51,7 +51,7 @@ struct SettingsView: View {
         .alert(isPresented: $showInvalidEmojiAlert) {
             Alert(title: Text("Invalid Emoji"), message: Text("Please enter a valid emoji."), dismissButton: .default(Text("OK")))
         }
-        .navigationTitle("Settings")
+//        .navigationTitle("Settings")
     }
 
     private func addEmoji() {

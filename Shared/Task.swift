@@ -44,19 +44,34 @@ class TaskStorage {
     
     func saveTasks(_ tasks: [Task]) {
         do {
-            let data = try JSONEncoder().encode(tasks)
-            userDefaults.set(data, forKey: taskKey)
+            let encoder = JSONEncoder()
+            let data = try encoder.encode(tasks)
+            UserDefaults.standard.set(data, forKey: "tasks")
         } catch {
-            print("Failed to save tasks: \(error.localizedDescription)")
+            print("Failed to encode tasks: \(error.localizedDescription)")
         }
     }
     
     func loadTasks() -> [Task] {
-        guard let data = userDefaults.data(forKey: taskKey),
-              let tasks = try? JSONDecoder().decode([Task].self, from: data) else {
+        guard let data = UserDefaults.standard.data(forKey: "tasks") else { return [] }
+        
+        do {
+            let decoder = JSONDecoder()
+            let tasks = try decoder.decode([Task].self, from: data)
+            return tasks
+        } catch {
+            print("Failed to decode tasks: \(error.localizedDescription)")
             return []
         }
-        return tasks
+    }
+    
+    func loadTasksAsync(completion: @escaping ([Task]) -> Void) {
+        DispatchQueue.global(qos: .background).async {
+            let tasks = self.loadTasks()
+            DispatchQueue.main.async {
+                completion(tasks)
+            }
+        }
     }
 
     func saveEmojiBank(_ emojiBank: EmojiBank) {

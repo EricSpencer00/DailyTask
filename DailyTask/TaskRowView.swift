@@ -56,7 +56,6 @@ struct TaskRowView: View {
         .background(Color.white)
         .cornerRadius(15)
         .shadow(radius: 5)
-        
     }
 
     private func saveTasks() {
@@ -72,6 +71,13 @@ struct TaskRowView: View {
             saveTasks()
             WidgetCenter.shared.reloadAllTimelines()
         }
+    }
+    
+    private func clearAllTasks() {
+        tasks.forEach { NotificationManager.shared.unscheduleNotification(for: $0) }
+        tasks.removeAll()
+        saveTasks()
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     private func color(for urgency: Urgency) -> Color {

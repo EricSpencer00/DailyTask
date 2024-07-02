@@ -1,7 +1,7 @@
 import SwiftUI
 import WidgetKit
 import CoreData
-import ConfettiSwiftUI
+import UniformTypeIdentifiers
 
 struct ContentView: View {
     @AppStorage("lastResetDate", store: UserDefaults(suiteName: "group.com.yourcompany.DailyTaskChecker")) private var lastResetDate: String = ""
@@ -48,7 +48,15 @@ struct ContentView: View {
                     addTaskAction: addTask,
                     isFocused: _isFocused
                 )
-                .confettiCannon(counter: $confettiTrigger, confettiSize: 20.0, repetitions: 3, repetitionInterval: 0.5)
+//                .confettiCannon(counter: $confettiTrigger, confettiSize: 20.0, repetitions: 3, repetitionInterval: 0.5)
+                
+                if isEditing {
+                    Button(action: clearAllTasks) {
+                        Text("Clear All Tasks")
+                            .foregroundColor(.red)
+                    }
+                    .padding()
+                }
             }
             .onAppear(perform: checkAndResetTasks)
             .onOpenURL(perform: handleOpenURL)
@@ -78,7 +86,9 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            loadTasks()
+            loadTasksAsync { loadedTasks in
+                self.tasks = loadedTasks
+            }
             isFocused = false
         }
     }
@@ -133,9 +143,13 @@ struct ContentView: View {
         }
     }
 
-    private func loadTasks() {
-        tasks = TaskStorage.shared.loadTasks()
-        emojiBank = TaskStorage.shared.loadEmojiBank()
+    private func loadTasksAsync(completion: @escaping ([Task]) -> Void) {
+        DispatchQueue.global(qos: .background).async {
+            let tasks = TaskStorage.shared.loadTasks()
+            DispatchQueue.main.async {
+                completion(tasks)
+            }
+        }
     }
 
     private func saveTasks() {
@@ -165,6 +179,13 @@ struct ContentView: View {
             saveTasks()
             WidgetCenter.shared.reloadAllTimelines()
         }
+    }
+    
+    private func clearAllTasks() {
+        tasks.forEach { NotificationManager.shared.unscheduleNotification(for: $0) }
+        tasks.removeAll()
+        saveTasks()
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     private func moveTask(from source: IndexSet, to destination: Int) {
@@ -211,10 +232,20 @@ struct TaskBucketView: View {
 
     var body: some View {
         ForEach(Urgency.allCases, id: \.self) { urgency in
-            if !tasks.filter({ $0.urgency == urgency }).isEmpty {
-                TaskBucket(urgency: urgency, tasks: $tasks, taskToComplete: $taskToComplete, showCompletionConfirmation: $showCompletionConfirmation, taskToEdit: $taskToEdit, isEditing: $isEditing)
+            VStack {
+                if !tasks.filter({ $0.urgency == urgency }).isEmpty {
+                    TaskBucket(urgency: urgency, tasks: $tasks, taskToComplete: $taskToComplete, showCompletionConfirmation: $showCompletionConfirmation, taskToEdit: $taskToEdit, isEditing: $isEditing)
+                } else {
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(height: 50) // Ensure drop area is visible
+                        .overlay(
+                            Text(urgency.displayName)
+                                .foregroundColor(.gray)
+                        )
+                        .onDrop(of: [UTType.text], delegate: TaskDropDelegate(task: Task(id: UUID(), name: ""), tasks: $tasks, currentUrgency: urgency))
+                }
             }
         }
     }
 }
-

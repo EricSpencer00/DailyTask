@@ -42,7 +42,7 @@ extension View {
         self
             .background(
                 EmojiKeyboardHelper(isVisible: isVisible)
-                    .frame(width: 0, height: 0) // Invisible helper view
+                    .frame(width: 10, height: 10) // Invisible helper view
             )
     }
 }
