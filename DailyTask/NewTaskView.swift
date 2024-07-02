@@ -84,22 +84,22 @@ struct NewTaskView: View {
                             .pickerStyle(MenuPickerStyle())
                         }
                         
-                        Toggle(isOn: $isNotificationEnabled) {
-                            Text("Enable Notification")
-                        }
-                        .padding(.bottom, 8)
-                        
-                        if isNotificationEnabled {
-                            DatePicker("Notification Time", selection: Binding(
-                                get: {
-                                    notificationTime ?? Date()
-                                },
-                                set: { newValue in
-                                    notificationTime = newValue
-                                }
-                            ), displayedComponents: .hourAndMinute)
-                            .padding(.bottom, 8)
-                        }
+//                        Toggle(isOn: $isNotificationEnabled) {
+//                            Text("Enable Notification")
+//                        }
+//                        .padding(.bottom, 8)
+//                        
+//                        if isNotificationEnabled {
+//                            DatePicker("Notification Time", selection: Binding(
+//                                get: {
+//                                    notificationTime ?? Date()
+//                                },
+//                                set: { newValue in
+//                                    notificationTime = newValue
+//                                }
+//                            ), displayedComponents: .hourAndMinute)
+//                            .padding(.bottom, 8)
+//                        }
 
                         Button(action: {
                             addTaskAction()

@@ -10,7 +10,7 @@ struct SettingsView: View {
     @State private var showInvalidEmojiAlert = false
     @AppStorage("selectedTheme", store: UserDefaults(suiteName: "group.com.yourcompany.DailyTaskChecker")) private var selectedTheme: String = "System Default"
     @AppStorage("notificationTime", store: UserDefaults(suiteName: "group.com.yourcompany.DailyTaskChecker")) private var notificationTimeString: String = DateFormatter.localizedString(from: Date(), dateStyle: .none, timeStyle: .short)
-    @State private var emojiKeyboardVisible = false
+//    @State private var emojiKeyboardVisible = false
 
     private let defaultEmojis = ["✅", "💊", "💉", "🩸", "🚴‍♂️", "🏃‍♂️", "🧘‍♂️", "⭐️"]
 
@@ -20,11 +20,8 @@ struct SettingsView: View {
                 EmojiGrid(emojiBank: $emojiBank)
                 
                 HStack {
-                    TextField("New Emoji", text: $newEmoji, onEditingChanged: { _ in
-                        emojiKeyboardVisible = true
-                    })
+                    TextField("New Emoji", text: $newEmoji)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .emojiKeyboard($emojiKeyboardVisible)
                     Button(action: addEmoji) {
                         Text("Add")
                     }

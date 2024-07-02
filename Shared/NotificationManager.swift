@@ -12,6 +12,7 @@ class NotificationManager {
     static let shared = NotificationManager()
     
     func scheduleNotification(for task: Task) {
+        print("Scheduling notification for task: \(task.name)")
         guard task.notificationEnabled, let notificationTime = task.notificationTime else { return }
         
         let content = UNMutableNotificationContent()

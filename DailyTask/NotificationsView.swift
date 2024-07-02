@@ -10,17 +10,17 @@ struct NotificationView: View {
                 Toggle(isOn: $disableAll) {
                     Text("Disable Notifications")
                 }
-                .onChange(of: disableAll) { newValue, transaction in
+                .onChange(of: disableAll) { newValue in
                     handleDisableAllChange(newValue)
                 }
             }
 
-            ForEach($tasks) { $task in
+            ForEach($tasks, id: \.id) { $task in
                 Section(header: Text(task.name)) {
                     Toggle(isOn: $task.notificationEnabled) {
                         Text("Enable Notifications")
                     }
-                    .onChange(of: task.notificationEnabled) { newValue, transaction in
+                    .onChange(of: task.notificationEnabled) { newValue in
                         handleNotificationEnabledChange(for: task, isEnabled: newValue)
                     }
                     
@@ -46,7 +46,9 @@ struct NotificationView: View {
             if newValue {
                 NotificationManager.shared.unscheduleNotification(for: tasks[index])
             } else {
-                NotificationManager.shared.scheduleNotification(for: tasks[index])
+                if let notificationTime = tasks[index].notificationTime {
+                    NotificationManager.shared.scheduleNotification(for: tasks[index])
+                }
             }
         }
         TaskStorage.shared.saveTasks(tasks)
@@ -54,7 +56,9 @@ struct NotificationView: View {
 
     private func handleNotificationEnabledChange(for task: Task, isEnabled: Bool) {
         if isEnabled {
-            NotificationManager.shared.scheduleNotification(for: task)
+            if let notificationTime = task.notificationTime {
+                NotificationManager.shared.scheduleNotification(for: task)
+            }
         } else {
             NotificationManager.shared.unscheduleNotification(for: task)
         }
