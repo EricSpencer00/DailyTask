@@ -1,5 +1,11 @@
-import Foundation
+//
+//  AchievementManager.swift
+//  DailyTask
+//
+//  Created by Eric Spencer on 7/2/24.
+//
 
+import Foundation
 class AchievementManager {
     static let shared = AchievementManager()
     private var achievements: Set<Achievement> = []

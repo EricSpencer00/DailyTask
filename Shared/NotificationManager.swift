@@ -11,9 +11,27 @@ import UserNotifications
 class NotificationManager {
     static let shared = NotificationManager()
     
+    private func currentTimeString() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        return formatter.string(from: Date())
+    }
+    
+    private func notificationTimeString(for date: Date?) -> String {
+        guard let date = date else { return "No notification time set" }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        return formatter.string(from: date)
+    }
+    
     func scheduleNotification(for task: Task) {
-        print("Scheduling notification for task: \(task.name)")
-        guard task.notificationEnabled, let notificationTime = task.notificationTime else { return }
+        guard task.notificationEnabled, let notificationTime = task.notificationTime else {
+            print("\(currentTimeString()) - Task: \(task.name) has no notification time or notifications are disabled.")
+            return
+        }
+        
+        let notificationTimeString = self.notificationTimeString(for: notificationTime)
+        print("Scheduling notification for task: \(task.name) at \(notificationTimeString)")
         
         let content = UNMutableNotificationContent()
         content.title = "Reminder"
@@ -33,9 +51,15 @@ class NotificationManager {
     }
     
     func unscheduleNotification(for task: Task) {
-        print("Unscheduling notification for task: \(task.name)")
+        guard let notificationTime = task.notificationTime else {
+            print("Unscheduling notification for task: \(task.name) - No notification time set.")
+            return
+        }
+        
+        let notificationTimeString = self.notificationTimeString(for: notificationTime)
+        print("Unscheduling notification for task: \(task.name) at \(notificationTimeString)")
+        
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [task.id.uuidString])
         UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [task.id.uuidString])
     }
 }
-

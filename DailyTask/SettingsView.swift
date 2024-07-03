@@ -40,7 +40,7 @@ struct SettingsView: View {
                     }
                 }
                 Section {
-                    NavigationLink(destination: StreaksView()) {
+                    NavigationLink(destination: MainTrophyRoomView(tasks: tasks, emojiBank: TaskStorage.shared.loadEmojiBank())) {
                         Text("Trophies 🏆")
                     }
                 }
