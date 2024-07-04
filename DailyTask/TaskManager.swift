@@ -3,7 +3,27 @@ import UserNotifications
 
 class TaskManager {
     static let shared = TaskManager()
+    
     private init() {}
+    
+    func checkAndResetTasks() {
+        let today = getCurrentDateString()
+        let lastResetDate = UserDefaults.standard.string(forKey: "lastResetDate") ?? ""
+        
+        if today != lastResetDate {
+            var tasks = TaskStorage.shared.loadTasks()
+            tasks.indices.forEach { tasks[$0].isCompleted = false }
+            TaskStorage.shared.saveTasks(tasks)
+            UserDefaults.standard.set(today, forKey: "lastResetDate")
+            print("Tasks have been reset for the new day.")
+        }
+    }
+    
+    private func getCurrentDateString() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: Date())
+    }
 
     func scheduleNotification(for task: Task) {
         guard let notificationTime = task.notificationTime else { return }
@@ -46,7 +66,6 @@ class TaskManager {
     }
 
     private func loadTasks() -> [Task] {
-        // Implement your task loading logic here
         return []
     }
 }

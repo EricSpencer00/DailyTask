@@ -10,6 +10,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         
         let tasks = TaskStorage.shared.loadTasks()
         scheduleDailyReminder(tasks: tasks)
+        
+        NotificationManager.shared.scheduleMidnightReset()
                 
         return true
     }
@@ -45,3 +47,4 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         }
     }
 }
+

@@ -1,15 +1,10 @@
-//
-//  NotificationManager.swift
-//  DailyTask
-//
-//  Created by Eric Spencer on 6/30/24.
-//
-
 import Foundation
 import UserNotifications
 
 class NotificationManager {
     static let shared = NotificationManager()
+    
+    private init() {}
     
     private func currentTimeString() -> String {
         let formatter = DateFormatter()
@@ -61,5 +56,24 @@ class NotificationManager {
         
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [task.id.uuidString])
         UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [task.id.uuidString])
+    }
+    
+    func scheduleMidnightReset() {
+        let content = UNMutableNotificationContent()
+        content.title = "Daily Task Reset"
+        content.body = "Resetting tasks for the new day."
+        
+        var dateComponents = DateComponents()
+        dateComponents.hour = 0
+        dateComponents.minute = 0
+        
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+        let request = UNNotificationRequest(identifier: "midnightReset", content: content, trigger: trigger)
+        
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Error scheduling midnight reset: \(error)")
+            }
+        }
     }
 }
