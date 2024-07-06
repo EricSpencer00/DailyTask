@@ -1,5 +1,6 @@
 import UIKit
 import UserNotifications
+import BackgroundTasks
 
 class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     var window: UIWindow?
@@ -11,7 +12,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         let tasks = TaskStorage.shared.loadTasks()
         scheduleDailyReminder(tasks: tasks)
         
-        NotificationManager.shared.scheduleMidnightReset()
+//        NotificationManager.shared.scheduleMidnightReset()
+//        scheduleBackgroundTask()
                 
         return true
     }
@@ -44,6 +46,34 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             if task.notificationEnabled {
                 NotificationManager.shared.scheduleNotification(for: task)
             }
+        }
+    }
+    
+    func scheduleBackgroundTask() {
+        let request = BGAppRefreshTaskRequest(identifier: "com.yourcompany.DailyTaskChecker.resetTasks")
+        request.earliestBeginDate = Calendar.current.nextDate(after: Date(), matching: DateComponents(hour: 0), matchingPolicy: .nextTime)!
+        
+        do {
+            try BGTaskScheduler.shared.submit(request)
+        } catch {
+            print("Failed to schedule background task: \(error)")
+        }
+    }
+    
+    func handleBackgroundTask(task: BGAppRefreshTask) {
+        task.expirationHandler = {
+            task.setTaskCompleted(success: false)
+        }
+        
+        TaskManager.shared.checkAndResetTasks()
+        task.setTaskCompleted(success: true)
+
+        scheduleBackgroundTask()
+    }
+    
+    func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: "com.yourcompany.DailyTaskChecker.resetTasks", using: nil) { task in
+            self.handleBackgroundTask(task: task as! BGAppRefreshTask)
         }
     }
 }
